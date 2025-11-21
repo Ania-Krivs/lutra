@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - MONGO_DSN=mongodb://mongo:27017/Armadillo
+      - MONGO_DSN=${MONGO_DSN}
     depends_on:
       - mongo
     restart: unless-stopped

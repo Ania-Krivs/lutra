@@ -1,3 +1,3 @@
 __version__ = '1.0.0'
-__projname__ = 'Glareola'
+__projname__ = 'lutra'
 __description__ = 'Workflow'

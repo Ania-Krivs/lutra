@@ -9,6 +9,7 @@ from app.data import schemas
 from app.utils.error import Error
 from app.utils.auth import create_user, authenticate_user
 from app.utils.security import verify_password, get_current_user
+from app.core.user import find_user, registrate_user
 
 from typing import Annotated
 import uuid
@@ -22,6 +23,7 @@ async def registration_user(request: schemas.UserSchema) -> schemas.UserLogIn:
 
     token_expires = timedelta(minutes=1440)
     token = await authenticate_user(data={"sub": request.email}, expires_delta=token_expires)
+    
     return schemas.UserLogIn(
         user_token=str(token)
     )
@@ -29,11 +31,14 @@ async def registration_user(request: schemas.UserSchema) -> schemas.UserLogIn:
 
 @router.post("/login")
 async def log_in_user(request: Annotated[OAuth2PasswordRequestForm, Depends()]) -> schemas.Token:
-    user = await User.find_one(User.email == request.username)
+    user = await find_user(request.username)
     if not user or not verify_password(request.password, user.password):
         raise Error.UNAUTHORIZED_INVALID
 
     token_expires = timedelta(minutes=1440)
     token = await authenticate_user(data={"sub": request.username}, expires_delta=token_expires)
 
-    return schemas.Token(access_token=token, token_type="bearer")
+    return schemas.Token(
+        access_token=token, 
+        token_type="bearer"
+    )

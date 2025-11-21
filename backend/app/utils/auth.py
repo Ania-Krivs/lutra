@@ -5,22 +5,21 @@ from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from app import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from app.utils.error import Error
+from app.core.user import find_user, registrate_user
 
 import jwt
 
 context_pass = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def create_user(request: schemas.UserSchema):
-    user_exists = await User.find_one(User.email == request.email)
+async def create_user(email: str, password: str):
+    
+    user_exists = await find_user(email)
     if user_exists:
         raise Error.LOGIN_EXISTS
-    hashed_password = context_pass.hash(request.password)[:72]
-    user = User(
-        email=request.email,
-        password=hashed_password
-    )
-    await user.create()
+    hashed_password = context_pass.hash(password)
+    user = await registrate_user(email, hashed_password)
+    
     return user
     
 async def authenticate_user(data: dict, expires_delta):
