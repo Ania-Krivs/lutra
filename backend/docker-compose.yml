@@ -30,9 +30,7 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       SECRET_KEY_USER: ${SECRET_KEY_USER}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
-    depends_on:
-      mongo:
-        condition: service_healthy
+    depends_on: mongo
     restart: unless-stopped
 
 volumes:
