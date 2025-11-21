@@ -1,26 +1,39 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    command: ["--bind_ip_all"]
+
   fastapi:
     build: .
+    container_name: fastapi
+    working_dir: /backend
+    volumes:
+      - ./:/backend
     ports:
       - "8000:8000"
     environment:
-      - MONGO_DSN=${MONGO_DSN}
+      MONGO_DSN: ${MONGO_DSN}
+      ENVIRONMENT: ${ENVIRONMENT}
+      ALGORITHM: ${ALGORITHM}
+      SECRET_KEY: ${SECRET_KEY}
+      SECRET_KEY_USER: ${SECRET_KEY_USER}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     restart: unless-stopped
-    volumes:
-      - ./:/backend 
-    working_dir: /backend
-
-  mongo:
-    image: mongo:6
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    command: [--bind_ip_all]
 
 volumes:
   mongo_data:
